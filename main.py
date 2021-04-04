@@ -1,13 +1,13 @@
-import bluetooth as bt
-import requests
 import yaml
+import requests
+import bluetooth as bt
 
 TOKEN_NAME = 'x-bt-user-token'
 INTERVAL = 5
 
 
 class PalGateAutomator:
-    def __init__(self, gate_name: str = None):
+    def __init__(self, gate_name: str):
         self.gate_name = gate_name
         self.gate_id = self.get_key(gate_name)
         self.token = self.get_key('token')
@@ -25,13 +25,8 @@ class PalGateAutomator:
     def open_gate(self, gate_id: str, mac: str):
         url = f'https://api1.pal-es.com/v1/bt/device/{gate_id}/open-gate?outputNum=1'
         response = requests.get(url, headers={TOKEN_NAME: self.token})
-        if response.status_code != 200 or response.json()['msg'] != 'Gate opened: true':
-            self.handle_error(response)
-        else:
+        if response.status_code == 200 and response.json()['msg'] == 'Gate opened: true':
             self.log_action(mac)
-
-    def handle_error(self, response: requests.Response):
-        pass
 
     def log_action(self, mac):
         device_name = self.authorized_devices[mac]
@@ -41,17 +36,13 @@ class PalGateAutomator:
     def get_key(key: str):
         with open('keys.yaml') as keys_file:
             keys = yaml.load(keys_file)
-            if key == 'token':
-                return keys['token']
-            else:
-                return keys['gates'][key]
+            return keys['token'] if key == 'token' else keys['gates'][key]
 
-    @staticmethod
-    def get_authorized_devices():
+    def get_authorized_devices(self):
         with open('authorized_devices.yaml') as authorized_devices:
-            return yaml.load(authorized_devices)
+            return yaml.load(authorized_devices)[self.gate_name]
 
 
-if '__main__' == __name__:
+if __name__ == '__main__':
     pga = PalGateAutomator('upper')
     pga.main()
