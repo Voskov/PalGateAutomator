@@ -17,6 +17,7 @@ class PalGateAutomator:
         self.authorized_macs = set(self.authorized_devices.keys())
 
     def main(self):
+        print(f'Starting service for {self.gate_name}')
         while True:
             devices = bt.discover_devices(duration=INTERVAL, flush_cache=True, lookup_names=True, lookup_class=True)
             macs = [device[0] for device in devices]
