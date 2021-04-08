@@ -1,3 +1,5 @@
+import argparse
+from pathlib import Path
 import yaml
 import requests
 import bluetooth as bt
@@ -34,15 +36,19 @@ class PalGateAutomator:
 
     @staticmethod
     def get_key(key: str):
-        with open('keys.yaml') as keys_file:
-            keys = yaml.load(keys_file)
+        with open(Path(__file__).parent / 'keys.yaml') as keys_file:
+            keys = yaml.safe_load(keys_file)
             return keys['token'] if key == 'token' else keys['gates'][key]
 
     def get_authorized_devices(self):
-        with open('authorized_devices.yaml') as authorized_devices:
-            return yaml.load(authorized_devices)[self.gate_name]
+        with open(Path(__file__).parent / 'authorized_devices.yaml') as authorized_devices:
+            return yaml.safe_load(authorized_devices)[self.gate_name]
 
 
 if __name__ == '__main__':
-    pga = PalGateAutomator('upper')
+    parser = argparse.ArgumentParser(description='Pal Gate args parser')
+    parser.add_argument('--gate_name', type=str, help='The name of the gate')
+    args = parser.parse_args()
+    door_name = args.gate_name or 'door'
+    pga = PalGateAutomator(door_name)
     pga.main()
