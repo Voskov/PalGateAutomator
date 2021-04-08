@@ -1,3 +1,4 @@
 token: pal_gate_token
+active_gate: gate_name
 gates:
   gate_name: gate_id

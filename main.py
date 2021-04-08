@@ -9,9 +9,9 @@ INTERVAL = 5
 
 
 class PalGateAutomator:
-    def __init__(self, gate_name: str):
-        self.gate_name = gate_name
-        self.gate_id = self.get_key(gate_name)
+    def __init__(self):
+        self.gate_name = self.get_key('active_gate')
+        self.gate_id = self.get_key(self.gate_name)
         self.token = self.get_key('token')
         self.authorized_devices = self.get_authorized_devices()
         self.authorized_macs = set(self.authorized_devices.keys())
@@ -39,7 +39,12 @@ class PalGateAutomator:
     def get_key(key: str):
         with open(Path(__file__).parent / 'keys.yaml') as keys_file:
             keys = yaml.safe_load(keys_file)
-            return keys['token'] if key == 'token' else keys['gates'][key]
+            if key == 'token':
+                return keys['token']
+            elif key == 'active_gate':
+                return keys['active_gate']
+            else:
+                return keys['gates'][key]
 
     def get_authorized_devices(self):
         with open(Path(__file__).parent / 'authorized_devices.yaml') as authorized_devices:
@@ -47,9 +52,5 @@ class PalGateAutomator:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Pal Gate args parser')
-    parser.add_argument('--gate_name', type=str, help='The name of the gate')
-    args = parser.parse_args()
-    door_name = args.gate_name or 'door'
-    pga = PalGateAutomator(door_name)
+    pga = PalGateAutomator()
     pga.main()
